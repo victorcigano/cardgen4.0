@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: cardgenerator
+    env: java
+    buildCommand: ./gradlew build --no-daemon
+    startCommand: java -jar build/libs/CardGeneratorVictorNicolauNeto-0.0.1-SNAPSHOT.jar
+    envVars:
+      - key: PORT
+        value: 8080
