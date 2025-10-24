@@ -2,8 +2,11 @@ services:
   - type: web
     name: cardgenerator
     env: java
-    buildCommand: ./gradlew build --no-daemon
-    startCommand: java -jar build/libs/CardGeneratorVictorNicolauNeto-0.0.1-SNAPSHOT.jar
+    buildCommand: ./gradlew build -x test
+    startCommand: java -Dserver.port=$PORT -jar build/libs/*.jar
+    plan: free
     envVars:
+      - key: JAVA_TOOL_OPTIONS
+        value: -XX:MaxRAMPercentage=75.0
       - key: PORT
-        value: 8080
+        generateValue: true

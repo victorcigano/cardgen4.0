@@ -30,6 +30,8 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	// JPA and H2 for persistence
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	// Validation support
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
 	runtimeOnly 'com.h2database:h2'
 	// no Spring Security: simple registration performed at app level
 	compileOnly 'org.projectlombok:lombok'

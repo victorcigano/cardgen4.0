@@ -9,12 +9,38 @@ public class CardGenerator {
     private Random random = new Random();
 
     public String gerarNumero() {
+        // Gerar 15 dígitos aleatórios
         StringBuilder numero = new StringBuilder();
-        
-        for (int i = 0; i < 12; i++) {
+        for (int i = 0; i < 15; i++) {
             numero.append(random.nextInt(10));
         }
-        return numero.toString();
+        
+        // Calcular dígito verificador usando algoritmo de Luhn
+        String base = numero.toString();
+        int checkDigit = calcularDigitoLuhn(base);
+        
+        return base + checkDigit;
+    }
+    
+    private int calcularDigitoLuhn(String numero) {
+        int sum = 0;
+        boolean alternate = true;
+        
+        for (int i = numero.length() - 1; i >= 0; i--) {
+            int digit = Character.getNumericValue(numero.charAt(i));
+            
+            if (alternate) {
+                digit *= 2;
+                if (digit > 9) {
+                    digit = (digit % 10) + 1;
+                }
+            }
+            
+            sum += digit;
+            alternate = !alternate;
+        }
+        
+        return (10 - (sum % 10)) % 10;
     }
 
     public int gerarCVV() {
@@ -28,7 +54,7 @@ public class CardGenerator {
     }
 
     public String gerarBandeira() {
-        String[] bandeiras = {"Visa", "MasterCard", "Elo", "Amex"};
+        String[] bandeiras = {"Visa", "MasterCard", "Elo", "American Express", "Hipercard"};
         return bandeiras[random.nextInt(bandeiras.length)];
     }
 

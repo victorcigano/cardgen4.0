@@ -1,4 +1,18 @@
-Como rodar este projeto localmente (sem alterar o sistema)
+# 🎯 CardGenerator - Gerador de Cartões Fictícios
+
+## 📋 Visão Geral
+Aplicação Spring Boot para geração de cartões de crédito fictícios para desenvolvimento e testes. Inclui frontend moderno, API REST completa e painel administrativo.
+
+## ✨ Funcionalidades
+- 🎲 Geração de cartões com algoritmo de Luhn
+- 🔐 Sistema de autenticação simples
+- 👨‍💼 Painel administrativo
+- 📱 Interface responsiva e moderna
+- 🧪 Testes unitários completos
+- 📊 Validações robustas
+- 🗄️ Persistência em banco H2
+
+## 🚀 Como rodar este projeto localmente (sem alterar o sistema)
 
 Este repositório contém uma aplicação Spring Boot simples (CardGenerator) com frontend estático em `src/main/resources/static`.
 As instruções abaixo mostram duas opções: usar um JDK já instalado no sistema ou utilizar um JDK portátil dentro do próprio workspace (sem alterar variáveis do Windows).
@@ -81,15 +95,88 @@ Resolução de problemas comuns
 
 Se quiser que eu baixe e execute automaticamente o JDK portátil aqui no workspace, me autorize (vou apenas colocar os arquivos em `.jdk` e rodar `gradlew` na sessão do terminal integrado do VS Code, sem tocar no sistema).
 
----
-Versão curta de como rodar (se já tiver Java 17):
+## 🎯 Versão Rápida (Java 17+)
 
 ```powershell
 .\gradlew.bat bootRun
-# abrir http://localhost:8080/
+# Abrir http://localhost:8080/
 ```
 
+## 🧪 Executar Testes
+
+```powershell
+.\gradlew.bat test
+```
+
+## 📚 Documentação
+- **API**: Veja `API_DOCUMENTATION.md`
+- **Frontend**: Interface em `src/main/resources/static/`
+- **Testes**: Cobertura completa em `src/test/`
+
+## 🔧 Melhorias Implementadas
+
+### ✅ Segurança
+- Validações robustas em todos os endpoints
+- Sanitização de dados no frontend
+- Headers de autenticação customizados
+- CORS configurado adequadamente
+
+### ✅ Qualidade do Código
+- Testes unitários completos (CardGenerator, CardValidator, Controllers)
+- Validações JPA com anotações
+- Tratamento de erros aprimorado
+- Algoritmo de Luhn para números válidos
+
+### ✅ Performance
+- Compressão HTTP habilitada
+- Configurações otimizadas do Gradle
+- Logging configurado adequadamente
+
+### ✅ Usabilidade
+- Interface moderna com animações
+- Feedback visual para todas as ações
+- Painel administrativo completo
+- Exportação de dados em CSV
+
+## 📁 Estrutura do Projeto
+
+```
+src/
+├── main/
+│   ├── java/com/sinodal/CardGeneratorVictorNicolauNeto/
+│   │   ├── controller/          # Controllers REST
+│   │   ├── model/              # Entidades e lógica de negócio
+│   │   ├── config/             # Configurações
+│   │   └── CardGeneratorApplication.java
+│   └── resources/
+│       ├── static/             # Frontend (HTML, CSS, JS)
+│       └── application.properties
+└── test/
+    └── java/                   # Testes unitários
+```
+
+## 🛠️ Tecnologias Utilizadas
+- **Backend**: Spring Boot 3.5.4, Java 17
+- **Frontend**: HTML5, CSS3, JavaScript ES6+, Bootstrap 5
+- **Banco**: H2 Database (file-based)
+- **Build**: Gradle 8.14.3
+- **Testes**: JUnit 5, Mockito
+
+## 🔐 Credenciais Padrão
+- **Admin**: `admin123`
+- **Banco H2**: usuário `sa`, senha vazia
+
+## 📊 Endpoints Principais
+- `POST /cards/gerar` - Gerar cartão
+- `GET /cards/listar` - Listar cartões
+- `DELETE /cards/{numero}` - Remover cartão
+- `POST /admin/auth` - Autenticação admin
+
 ---
-Arquivos adicionados/alterados neste workspace:
-- `.vscode/tasks.json` — tasks para rodar a aplicação (normal e debug)
-- `.vscode/launch.json` — configuração para anexar o depurador
+
+## 📝 Arquivos Importantes
+- `API_DOCUMENTATION.md` — Documentação completa da API
+- `build.gradle` — Dependências e configurações
+- `application.properties` — Configurações da aplicação
+- `.vscode/tasks.json` — Tasks para rodar a aplicação
+- `.vscode/launch.json` — Configuração para debug

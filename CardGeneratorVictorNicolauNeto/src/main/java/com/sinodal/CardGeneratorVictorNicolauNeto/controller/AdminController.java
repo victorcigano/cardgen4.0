@@ -14,7 +14,7 @@ import java.util.Map;
 @RequestMapping("/admin")
 public class AdminController {
 
-    private static final String ADMIN_PASS = "123";
+    private static final String ADMIN_PASS = "admin123";
 
     @Autowired
     private CardRepository repository;
@@ -22,24 +22,33 @@ public class AdminController {
     @PostMapping("/auth")
     public ResponseEntity<?> authenticate(@RequestBody Map<String, String> request,
                                         @RequestHeader(value = "X-CG-USER", required = false) String userHeader) {
-        if (userHeader == null || userHeader.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        if (userHeader == null || userHeader.trim().isEmpty()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(Map.of("error", "User authentication required"));
         }
         
         String password = request.get("password");
-        if (ADMIN_PASS.equals(password)) {
-            return ResponseEntity.ok().build();
+        if (password == null || password.trim().isEmpty()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(Map.of("error", "Password is required"));
         }
         
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        if (ADMIN_PASS.equals(password.trim())) {
+            return ResponseEntity.ok(Map.of("message", "Authentication successful"));
+        }
+        
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+            .body(Map.of("error", "Invalid credentials"));
     }
 
     private void checkAdmin(String adminHeader, String userHeader) {
-        if (userHeader == null || userHeader.isEmpty()) {
-            throw new org.springframework.web.server.ResponseStatusException(HttpStatus.UNAUTHORIZED, "Missing registration");
+        if (userHeader == null || userHeader.trim().isEmpty()) {
+            throw new org.springframework.web.server.ResponseStatusException(
+                HttpStatus.UNAUTHORIZED, "User registration required");
         }
-        if (adminHeader == null || !"authenticated".equals(adminHeader)) {
-            throw new org.springframework.web.server.ResponseStatusException(HttpStatus.FORBIDDEN, "Admin authentication required");
+        if (adminHeader == null || !"authenticated".equals(adminHeader.trim())) {
+            throw new org.springframework.web.server.ResponseStatusException(
+                HttpStatus.FORBIDDEN, "Admin authentication required");
         }
     }
 
