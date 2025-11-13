@@ -1,4 +1,4 @@
-FROM openjdk:17-jdk-slim
+FROM amazoncorretto:17-alpine
 
 WORKDIR /app
 
@@ -10,8 +10,8 @@ COPY gradle.properties .
 COPY src src
 
 RUN chmod +x ./gradlew
-RUN ./gradlew build -x test
+RUN ./gradlew clean build -x test
 
-EXPOSE 8080
+EXPOSE $PORT
 
-CMD ["java", "-jar", "build/libs/CardGeneratorVictorNicolauNeto-0.0.1-SNAPSHOT.jar"]
+CMD ["java", "-Dserver.port=$PORT", "-Dspring.profiles.active=prod", "-jar", "build/libs/CardGeneratorVictorNicolauNeto-0.0.1-SNAPSHOT.jar"]
