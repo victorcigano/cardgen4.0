@@ -1,0 +1,10 @@
+{
+    "java.configuration.updateBuildConfiguration": "automatic",
+    "java.compile.nullAnalysis.mode": "automatic",
+    "java.configuration.runtimes": [
+        {
+            "name": "JavaSE-17",
+            "path": "C:\\Users\\ti23\\AppData\\Local\\Programs\\Eclipse Adoptium\\jdk-17.0.17.10-hotspot"
+        }
+    ]
+}

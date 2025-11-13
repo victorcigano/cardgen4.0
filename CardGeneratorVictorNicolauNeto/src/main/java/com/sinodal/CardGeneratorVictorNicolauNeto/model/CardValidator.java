@@ -29,8 +29,11 @@ public class CardValidator {
         
         // Validar número do cartão
         String num = card.getNumero();
-        if (num == null || num.length() != 16) return false;
-        if (!num.matches("\\d{16}")) return false; // Apenas dígitos
+        if (num == null || (num.length() != 15 && num.length() != 16)) return false;
+        if (!num.matches("\\d+")) return false; // Apenas dígitos
+        
+        // Validar prefixo da bandeira
+        if (!validarPrefixoBandeira(num, card.getBandeira())) return false;
         
         // Validar CVV
         if (card.getCvv() < 100 || card.getCvv() > 999) return false;
@@ -51,11 +54,37 @@ public class CardValidator {
             int n = Integer.parseInt(ccNumber.substring(i, i + 1));
             if (alt) {
                 n *= 2;
-                if (n > 9) n = (n % 10) + 1;
+                if (n > 9) n = n - 9;
             }
             sum += n;
             alt = !alt;
         }
         return (sum % 10 == 0);
+    }
+    
+    public static boolean validarPrefixoBandeira(String numero, String bandeira) {
+        if (numero == null || bandeira == null) return false;
+        
+        switch (bandeira) {
+            case "Visa":
+                return numero.startsWith("4") && numero.length() == 16;
+            case "MasterCard":
+                return (numero.startsWith("51") || numero.startsWith("52") || 
+                       numero.startsWith("53") || numero.startsWith("54") || 
+                       numero.startsWith("55") || numero.startsWith("2221") || 
+                       numero.startsWith("2720")) && numero.length() == 16;
+            case "American Express":
+                return (numero.startsWith("34") || numero.startsWith("37")) && numero.length() == 15;
+            case "Elo":
+                return (numero.startsWith("4011") || numero.startsWith("4312") || 
+                       numero.startsWith("4389") || numero.startsWith("4514") || 
+                       numero.startsWith("4573") || numero.startsWith("5067") || 
+                       numero.startsWith("5090") || numero.startsWith("6277") || 
+                       numero.startsWith("6362") || numero.startsWith("6363")) && numero.length() == 16;
+            case "Hipercard":
+                return numero.startsWith("6062") && numero.length() == 16;
+            default:
+                return false;
+        }
     }
 }

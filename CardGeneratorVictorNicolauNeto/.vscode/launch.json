@@ -1,0 +1,24 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "CardGeneratorApplication",
+            "request": "launch",
+            "mainClass": "com.sinodal.CardGeneratorVictorNicolauNeto.CardGeneratorApplication",
+            "projectName": ""
+        },
+        {
+            "type": "java",
+            "name": "Run via Gradle",
+            "request": "launch",
+            "program": "${workspaceFolder}/gradlew.bat",
+            "args": [
+                "bootRun",
+                "--args=--server.port=8081"
+            ],
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}"
+        }
+    ]
+}

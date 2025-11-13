@@ -3,23 +3,63 @@ package com.sinodal.CardGeneratorVictorNicolauNeto.model;
 import org.springframework.stereotype.Service;
 import java.time.YearMonth;
 import java.util.Random;
+import java.util.Map;
+import java.util.HashMap;
 
 @Service
 public class CardGenerator {
     private Random random = new Random();
+    
+    // Prefixos válidos por bandeira (IIN - Issuer Identification Number)
+    private static final Map<String, String[]> PREFIXOS_BANDEIRA = new HashMap<>();
+    
+    static {
+        PREFIXOS_BANDEIRA.put("Visa", new String[]{"4"});
+        PREFIXOS_BANDEIRA.put("MasterCard", new String[]{"51", "52", "53", "54", "55", "2221", "2720"});
+        PREFIXOS_BANDEIRA.put("American Express", new String[]{"34", "37"});
+        PREFIXOS_BANDEIRA.put("Elo", new String[]{"4011", "4312", "4389", "4514", "4573", "5067", "5090", "6277", "6362", "6363"});
+        PREFIXOS_BANDEIRA.put("Hipercard", new String[]{"6062"});
+    }
 
     public String gerarNumero() {
-        // Gerar 15 dígitos aleatórios
-        StringBuilder numero = new StringBuilder();
-        for (int i = 0; i < 15; i++) {
+        String bandeira = gerarBandeira();
+        return gerarNumeroParaBandeira(bandeira);
+    }
+    
+    public String gerarNumeroParaBandeira(String bandeira) {
+        String[] prefixos = PREFIXOS_BANDEIRA.get(bandeira);
+        if (prefixos == null) {
+            // Fallback para Visa se bandeira não encontrada
+            prefixos = PREFIXOS_BANDEIRA.get("Visa");
+        }
+        
+        String prefixo = prefixos[random.nextInt(prefixos.length)];
+        int tamanhoTotal = getTamanhoCartao(bandeira);
+        
+        // Gerar dígitos restantes (exceto o último que é o verificador)
+        StringBuilder numero = new StringBuilder(prefixo);
+        int digitosRestantes = tamanhoTotal - prefixo.length() - 1;
+        
+        for (int i = 0; i < digitosRestantes; i++) {
             numero.append(random.nextInt(10));
         }
         
-        // Calcular dígito verificador usando algoritmo de Luhn
+        // Calcular e adicionar dígito verificador
         String base = numero.toString();
         int checkDigit = calcularDigitoLuhn(base);
         
         return base + checkDigit;
+    }
+    
+    private int getTamanhoCartao(String bandeira) {
+        switch (bandeira) {
+            case "American Express": return 15;
+            case "Visa":
+            case "MasterCard":
+            case "Elo":
+            case "Hipercard":
+            default: return 16;
+        }
     }
     
     private int calcularDigitoLuhn(String numero) {
@@ -32,7 +72,7 @@ public class CardGenerator {
             if (alternate) {
                 digit *= 2;
                 if (digit > 9) {
-                    digit = (digit % 10) + 1;
+                    digit = digit - 9;
                 }
             }
             
@@ -59,15 +99,14 @@ public class CardGenerator {
     }
 
     public Card gerarCard(String nomeTitular) {
+        String bandeira = gerarBandeira();
         Card card = new Card();
-        card.setNumero(gerarNumero());
+        card.setNumero(gerarNumeroParaBandeira(bandeira));
         card.setCvv(gerarCVV());
         card.setValidade(gerarValidade());
-        card.setBandeira(gerarBandeira());
+        card.setBandeira(bandeira);
         card.setNomeTitular(nomeTitular);
         card.setTeste(true);
         return card;
     }
 }
-
-
