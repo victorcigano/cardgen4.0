@@ -33,22 +33,30 @@ public class CardGenerator {
             prefixos = PREFIXOS_BANDEIRA.get("Visa");
         }
         
-        String prefixo = prefixos[random.nextInt(prefixos.length)];
-        int tamanhoTotal = getTamanhoCartao(bandeira);
+        String numeroFinal;
+        int tentativas = 0;
         
-        // Gerar dígitos restantes (exceto o último que é o verificador)
-        StringBuilder numero = new StringBuilder(prefixo);
-        int digitosRestantes = tamanhoTotal - prefixo.length() - 1;
+        do {
+            String prefixo = prefixos[random.nextInt(prefixos.length)];
+            int tamanhoTotal = getTamanhoCartao(bandeira);
+            
+            // Gerar dígitos restantes (exceto o último que é o verificador)
+            StringBuilder numero = new StringBuilder(prefixo);
+            int digitosRestantes = tamanhoTotal - prefixo.length() - 1;
+            
+            for (int i = 0; i < digitosRestantes; i++) {
+                numero.append(random.nextInt(10));
+            }
+            
+            // Calcular e adicionar dígito verificador
+            String base = numero.toString();
+            int checkDigit = calcularDigitoLuhn(base);
+            numeroFinal = base + checkDigit;
+            
+            tentativas++;
+        } while (!validarLuhn(numeroFinal) && tentativas < 100);
         
-        for (int i = 0; i < digitosRestantes; i++) {
-            numero.append(random.nextInt(10));
-        }
-        
-        // Calcular e adicionar dígito verificador
-        String base = numero.toString();
-        int checkDigit = calcularDigitoLuhn(base);
-        
-        return base + checkDigit;
+        return numeroFinal;
     }
     
     private int getTamanhoCartao(String bandeira) {
@@ -83,6 +91,27 @@ public class CardGenerator {
         // Retorna o dígito que torna a soma múltipla de 10
         int checkDigit = (10 - (sum % 10)) % 10;
         return checkDigit;
+    }
+    
+    private boolean validarLuhn(String numero) {
+        int sum = 0;
+        boolean doubleDigit = false;
+        
+        for (int i = numero.length() - 1; i >= 0; i--) {
+            int digit = Character.getNumericValue(numero.charAt(i));
+            
+            if (doubleDigit) {
+                digit *= 2;
+                if (digit > 9) {
+                    digit = digit - 9;
+                }
+            }
+            
+            sum += digit;
+            doubleDigit = !doubleDigit;
+        }
+        
+        return (sum % 10 == 0);
     }
 
     public int gerarCVV() {
