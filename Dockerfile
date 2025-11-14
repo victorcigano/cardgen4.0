@@ -11,6 +11,6 @@ COPY CardGeneratorVictorNicolauNeto/src src
 
 RUN chmod +x ./gradlew && ./gradlew build -x test
 
-EXPOSE $PORT
+EXPOSE 8080
 
-CMD ["java", "-Dserver.port=$PORT", "-Dspring.profiles.active=prod", "-jar", "build/libs/CardGeneratorVictorNicolauNeto-0.0.1-SNAPSHOT.jar"]
+CMD ["sh", "-c", "java -Dserver.port=${PORT:-8080} -Dspring.profiles.active=prod -jar build/libs/CardGeneratorVictorNicolauNeto-0.0.1-SNAPSHOT.jar"]
