@@ -2,15 +2,8 @@ FROM eclipse-temurin:17-jre
 
 WORKDIR /app
 
-COPY CardGeneratorVictorNicolauNeto/gradlew .
-COPY CardGeneratorVictorNicolauNeto/gradle gradle
-COPY CardGeneratorVictorNicolauNeto/build.gradle .
-COPY CardGeneratorVictorNicolauNeto/settings.gradle .
-COPY CardGeneratorVictorNicolauNeto/gradle.properties .
-COPY CardGeneratorVictorNicolauNeto/src src
-
-RUN chmod +x ./gradlew && ./gradlew build -x test
+COPY CardGeneratorVictorNicolauNeto/build/libs/CardGeneratorVictorNicolauNeto-0.0.1-SNAPSHOT.jar app.jar
 
 EXPOSE 8080
 
-CMD ["sh", "-c", "java -Dserver.port=${PORT:-8080} -Dspring.profiles.active=prod -jar build/libs/CardGeneratorVictorNicolauNeto-0.0.1-SNAPSHOT.jar"]
+CMD ["sh", "-c", "java -Dserver.port=${PORT:-8080} -Dspring.profiles.active=prod -jar app.jar"]

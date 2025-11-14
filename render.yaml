@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: cardgenerator
+    env: java
+    buildCommand: cd CardGeneratorVictorNicolauNeto && chmod +x ./gradlew && ./gradlew clean build -x test
+    startCommand: java -Dserver.port=$PORT -Dspring.profiles.active=prod -jar CardGeneratorVictorNicolauNeto/build/libs/CardGeneratorVictorNicolauNeto-0.0.1-SNAPSHOT.jar
+    plan: free
+    envVars:
+      - key: JAVA_TOOL_OPTIONS
+        value: -XX:MaxRAMPercentage=75.0
+      - key: PORT
+        generateValue: true
