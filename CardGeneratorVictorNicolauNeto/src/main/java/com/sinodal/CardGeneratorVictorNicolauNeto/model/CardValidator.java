@@ -64,16 +64,23 @@ public class CardValidator {
 
     private static boolean luhnCheck(String ccNumber) {
         int sum = 0;
-        boolean alt = false;
+        boolean doubleDigit = false;
+        
+        // Processa da direita para esquerda
         for (int i = ccNumber.length() - 1; i >= 0; i--) {
-            int n = Integer.parseInt(ccNumber.substring(i, i + 1));
-            if (alt) {
-                n *= 2;
-                if (n > 9) n = n - 9;
+            int digit = Character.getNumericValue(ccNumber.charAt(i));
+            
+            if (doubleDigit) {
+                digit *= 2;
+                if (digit > 9) {
+                    digit = (digit / 10) + (digit % 10);
+                }
             }
-            sum += n;
-            alt = !alt;
+            
+            sum += digit;
+            doubleDigit = !doubleDigit;
         }
+        
         return (sum % 10 == 0);
     }
     

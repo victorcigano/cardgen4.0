@@ -64,20 +64,21 @@ public class CardGenerator {
     
     private int calcularDigitoLuhn(String numero) {
         int sum = 0;
-        boolean alternate = true;
+        boolean doubleDigit = true; // Começa true pois o último dígito (verificador) não será dobrado
         
+        // Processa da direita para esquerda
         for (int i = numero.length() - 1; i >= 0; i--) {
             int digit = Character.getNumericValue(numero.charAt(i));
             
-            if (alternate) {
+            if (doubleDigit) {
                 digit *= 2;
                 if (digit > 9) {
-                    digit = digit - 9;
+                    digit = (digit / 10) + (digit % 10);
                 }
             }
             
             sum += digit;
-            alternate = !alternate;
+            doubleDigit = !doubleDigit;
         }
         
         return (10 - (sum % 10)) % 10;
