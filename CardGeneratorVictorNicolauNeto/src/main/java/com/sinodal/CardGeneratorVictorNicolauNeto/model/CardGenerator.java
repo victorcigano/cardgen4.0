@@ -15,9 +15,9 @@ public class CardGenerator {
     
     static {
         PREFIXOS_BANDEIRA.put("Visa", new String[]{"4"});
-        PREFIXOS_BANDEIRA.put("MasterCard", new String[]{"51", "52", "53", "54", "55", "2221", "2720"});
+        PREFIXOS_BANDEIRA.put("MasterCard", new String[]{"51", "52", "53", "54", "55", "2221", "2300", "2500", "2700"});
         PREFIXOS_BANDEIRA.put("American Express", new String[]{"34", "37"});
-        PREFIXOS_BANDEIRA.put("Elo", new String[]{"4011", "4312", "4389", "4514", "4573", "5067", "5090", "6277", "6362", "6363"});
+        PREFIXOS_BANDEIRA.put("Elo", new String[]{"4011", "4312", "4389", "4514", "4573", "5067", "5090", "6277", "6362", "6363", "636297", "636368", "438935"});
         PREFIXOS_BANDEIRA.put("Hipercard", new String[]{"6062"});
     }
 

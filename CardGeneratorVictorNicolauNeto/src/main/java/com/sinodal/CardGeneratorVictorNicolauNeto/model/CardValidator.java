@@ -29,8 +29,12 @@ public class CardValidator {
         
         // Validar número do cartão
         String num = card.getNumero();
-        if (num == null || (num.length() != 15 && num.length() != 16)) return false;
+        if (num == null) return false;
         if (!num.matches("\\d+")) return false; // Apenas dígitos
+        
+        // Validar comprimento baseado na bandeira
+        int expectedLength = getExpectedLength(card.getBandeira());
+        if (num.length() != expectedLength) return false;
         
         // Validar prefixo da bandeira
         if (!validarPrefixoBandeira(num, card.getBandeira())) return false;
@@ -45,6 +49,17 @@ public class CardValidator {
         
         // Check Luhn algorithm for plausible card numbers
         return luhnCheck(num);
+    }
+    
+    private static int getExpectedLength(String bandeira) {
+        switch (bandeira) {
+            case "American Express": return 15;
+            case "Visa":
+            case "MasterCard":
+            case "Elo":
+            case "Hipercard":
+            default: return 16;
+        }
     }
 
     private static boolean luhnCheck(String ccNumber) {
@@ -69,10 +84,11 @@ public class CardValidator {
             case "Visa":
                 return numero.startsWith("4") && numero.length() == 16;
             case "MasterCard":
-                return (numero.startsWith("51") || numero.startsWith("52") || 
-                       numero.startsWith("53") || numero.startsWith("54") || 
-                       numero.startsWith("55") || numero.startsWith("2221") || 
-                       numero.startsWith("2720")) && numero.length() == 16;
+                return ((numero.startsWith("51") || numero.startsWith("52") || 
+                        numero.startsWith("53") || numero.startsWith("54") || 
+                        numero.startsWith("55")) || 
+                       (numero.length() >= 4 && Integer.parseInt(numero.substring(0, 4)) >= 2221 && 
+                        Integer.parseInt(numero.substring(0, 4)) <= 2720)) && numero.length() == 16;
             case "American Express":
                 return (numero.startsWith("34") || numero.startsWith("37")) && numero.length() == 15;
             case "Elo":
@@ -80,7 +96,9 @@ public class CardValidator {
                        numero.startsWith("4389") || numero.startsWith("4514") || 
                        numero.startsWith("4573") || numero.startsWith("5067") || 
                        numero.startsWith("5090") || numero.startsWith("6277") || 
-                       numero.startsWith("6362") || numero.startsWith("6363")) && numero.length() == 16;
+                       numero.startsWith("6362") || numero.startsWith("6363") ||
+                       numero.startsWith("636297") || numero.startsWith("636368") ||
+                       numero.startsWith("438935")) && numero.length() == 16;
             case "Hipercard":
                 return numero.startsWith("6062") && numero.length() == 16;
             default:
