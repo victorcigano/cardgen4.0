@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="com.sinodal.CardGeneratorVictorNicolauNeto.controller.CardControllerTest" tests="9" skipped="0" failures="0" errors="0" timestamp="2025-11-13T22:13:13.511Z" hostname="LB01-03" time="0.72">
+<testsuite name="com.sinodal.CardGeneratorVictorNicolauNeto.controller.CardControllerTest" tests="9" skipped="0" failures="0" errors="0" timestamp="2025-11-14T00:41:44.001Z" hostname="LB01-03" time="0.632">
   <properties/>
-  <testcase name="testRemoverTodosSemUsuario()" classname="com.sinodal.CardGeneratorVictorNicolauNeto.controller.CardControllerTest" time="0.612"/>
-  <testcase name="testGerarCardSemUsuario()" classname="com.sinodal.CardGeneratorVictorNicolauNeto.controller.CardControllerTest" time="0.017"/>
-  <testcase name="testRemoverTodosComSucesso()" classname="com.sinodal.CardGeneratorVictorNicolauNeto.controller.CardControllerTest" time="0.017"/>
-  <testcase name="testGerarCardComSucesso()" classname="com.sinodal.CardGeneratorVictorNicolauNeto.controller.CardControllerTest" time="0.033"/>
-  <testcase name="testRemoverCardInexistente()" classname="com.sinodal.CardGeneratorVictorNicolauNeto.controller.CardControllerTest" time="0.008"/>
-  <testcase name="testGerarCardComNomeMuitoLongo()" classname="com.sinodal.CardGeneratorVictorNicolauNeto.controller.CardControllerTest" time="0.006"/>
-  <testcase name="testListarCards()" classname="com.sinodal.CardGeneratorVictorNicolauNeto.controller.CardControllerTest" time="0.006"/>
-  <testcase name="testRemoverCardSemUsuario()" classname="com.sinodal.CardGeneratorVictorNicolauNeto.controller.CardControllerTest" time="0.005"/>
+  <testcase name="testRemoverTodosSemUsuario()" classname="com.sinodal.CardGeneratorVictorNicolauNeto.controller.CardControllerTest" time="0.513"/>
+  <testcase name="testGerarCardSemUsuario()" classname="com.sinodal.CardGeneratorVictorNicolauNeto.controller.CardControllerTest" time="0.013"/>
+  <testcase name="testRemoverTodosComSucesso()" classname="com.sinodal.CardGeneratorVictorNicolauNeto.controller.CardControllerTest" time="0.014"/>
+  <testcase name="testGerarCardComSucesso()" classname="com.sinodal.CardGeneratorVictorNicolauNeto.controller.CardControllerTest" time="0.035"/>
+  <testcase name="testRemoverCardInexistente()" classname="com.sinodal.CardGeneratorVictorNicolauNeto.controller.CardControllerTest" time="0.007"/>
+  <testcase name="testGerarCardComNomeMuitoLongo()" classname="com.sinodal.CardGeneratorVictorNicolauNeto.controller.CardControllerTest" time="0.004"/>
+  <testcase name="testListarCards()" classname="com.sinodal.CardGeneratorVictorNicolauNeto.controller.CardControllerTest" time="0.017"/>
+  <testcase name="testRemoverCardSemUsuario()" classname="com.sinodal.CardGeneratorVictorNicolauNeto.controller.CardControllerTest" time="0.01"/>
   <testcase name="testRemoverCardComSucesso()" classname="com.sinodal.CardGeneratorVictorNicolauNeto.controller.CardControllerTest" time="0.004"/>
   <system-out><![CDATA[]]></system-out>
   <system-err><![CDATA[]]></system-err>

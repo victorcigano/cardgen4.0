@@ -64,24 +64,25 @@ public class CardGenerator {
     
     private int calcularDigitoLuhn(String numero) {
         int sum = 0;
-        boolean doubleDigit = true; // Começa true pois o último dígito (verificador) não será dobrado
         
-        // Processa da direita para esquerda
-        for (int i = numero.length() - 1; i >= 0; i--) {
-            int digit = Character.getNumericValue(numero.charAt(i));
+        // Processa da direita para esquerda, dobrando dígitos alternados
+        for (int i = 0; i < numero.length(); i++) {
+            int digit = Character.getNumericValue(numero.charAt(numero.length() - 1 - i));
             
-            if (doubleDigit) {
+            // Dobra dígitos em posições ímpares (contando da direita, começando em 0)
+            if (i % 2 == 1) {
                 digit *= 2;
                 if (digit > 9) {
-                    digit = (digit / 10) + (digit % 10);
+                    digit = digit - 9;
                 }
             }
             
             sum += digit;
-            doubleDigit = !doubleDigit;
         }
         
-        return (10 - (sum % 10)) % 10;
+        // Retorna o dígito que torna a soma múltipla de 10
+        int checkDigit = (10 - (sum % 10)) % 10;
+        return checkDigit;
     }
 
     public int gerarCVV() {

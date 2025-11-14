@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="com.sinodal.CardGeneratorVictorNicolauNeto.model.CardValidatorTest" tests="10" skipped="0" failures="0" errors="0" timestamp="2025-11-13T22:13:14.305Z" hostname="LB01-03" time="0.019">
+<testsuite name="com.sinodal.CardGeneratorVictorNicolauNeto.model.CardValidatorTest" tests="10" skipped="0" failures="0" errors="0" timestamp="2025-11-14T00:41:44.658Z" hostname="LB01-03" time="0.021">
   <properties/>
-  <testcase name="testValidarCardNulo()" classname="com.sinodal.CardGeneratorVictorNicolauNeto.model.CardValidatorTest" time="0.001"/>
-  <testcase name="testValidarCardTeste()" classname="com.sinodal.CardGeneratorVictorNicolauNeto.model.CardValidatorTest" time="0.002"/>
-  <testcase name="testValidarCardValidadeExpirada()" classname="com.sinodal.CardGeneratorVictorNicolauNeto.model.CardValidatorTest" time="0.001"/>
-  <testcase name="testValidarCardNumeroInvalido()" classname="com.sinodal.CardGeneratorVictorNicolauNeto.model.CardValidatorTest" time="0.001"/>
-  <testcase name="testValidarCardNomeVazio()" classname="com.sinodal.CardGeneratorVictorNicolauNeto.model.CardValidatorTest" time="0.0"/>
-  <testcase name="testValidarCardSemNome()" classname="com.sinodal.CardGeneratorVictorNicolauNeto.model.CardValidatorTest" time="0.004"/>
+  <testcase name="testValidarCardNulo()" classname="com.sinodal.CardGeneratorVictorNicolauNeto.model.CardValidatorTest" time="0.0"/>
+  <testcase name="testValidarCardTeste()" classname="com.sinodal.CardGeneratorVictorNicolauNeto.model.CardValidatorTest" time="0.0"/>
+  <testcase name="testValidarCardValidadeExpirada()" classname="com.sinodal.CardGeneratorVictorNicolauNeto.model.CardValidatorTest" time="0.0"/>
+  <testcase name="testValidarCardNumeroInvalido()" classname="com.sinodal.CardGeneratorVictorNicolauNeto.model.CardValidatorTest" time="0.011"/>
+  <testcase name="testValidarCardNomeVazio()" classname="com.sinodal.CardGeneratorVictorNicolauNeto.model.CardValidatorTest" time="0.002"/>
+  <testcase name="testValidarCardSemNome()" classname="com.sinodal.CardGeneratorVictorNicolauNeto.model.CardValidatorTest" time="0.001"/>
   <testcase name="testValidarCardCVVInvalido()" classname="com.sinodal.CardGeneratorVictorNicolauNeto.model.CardValidatorTest" time="0.001"/>
-  <testcase name="testValidarCardSemBandeira()" classname="com.sinodal.CardGeneratorVictorNicolauNeto.model.CardValidatorTest" time="0.001"/>
+  <testcase name="testValidarCardSemBandeira()" classname="com.sinodal.CardGeneratorVictorNicolauNeto.model.CardValidatorTest" time="0.0"/>
   <testcase name="testValidarCardNumeroComLetras()" classname="com.sinodal.CardGeneratorVictorNicolauNeto.model.CardValidatorTest" time="0.0"/>
   <testcase name="testValidarCardNomeMuitoLongo()" classname="com.sinodal.CardGeneratorVictorNicolauNeto.model.CardValidatorTest" time="0.0"/>
   <system-out><![CDATA[]]></system-out>
