@@ -43,4 +43,9 @@ public class Card {
 
     @Column(nullable = false)
     private boolean teste = false;
+    
+    // Associação: Card pertence a um usuário
+    @ManyToOne
+    @JoinColumn(name = "usuario_id")
+    private User usuario;
 }
