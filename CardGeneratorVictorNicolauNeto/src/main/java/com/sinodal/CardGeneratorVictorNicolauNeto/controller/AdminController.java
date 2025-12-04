@@ -1,79 +1,96 @@
 package com.sinodal.CardGeneratorVictorNicolauNeto.controller;
 
 import com.sinodal.CardGeneratorVictorNicolauNeto.model.Card;
-import com.sinodal.CardGeneratorVictorNicolauNeto.model.CardRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import com.sinodal.CardGeneratorVictorNicolauNeto.factory.CardFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @RestController
-@RequestMapping("/admin")
+@RequestMapping("/api/admin")
 public class AdminController {
-
-    private static final String ADMIN_PASS = "admin123";
-
-    @Autowired
-    private CardRepository repository;
-
-    @PostMapping("/auth")
-    public ResponseEntity<?> authenticate(@RequestBody Map<String, String> request,
-                                        @RequestHeader(value = "X-CG-USER", required = false) String userHeader) {
-        if (userHeader == null || userHeader.trim().isEmpty()) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                .body(Map.of("error", "User authentication required"));
+    
+    private static final Logger logger = LoggerFactory.getLogger(AdminController.class);
+    private static AdminController instance;
+    private final CardFactory cardFactory = CardFactory.getInstance();
+    private final Map<Long, Map<String, Object>> adminActions = new HashMap<>();
+    private Long nextId = 1L;
+    
+    public static AdminController getInstance() {
+        if (instance == null) {
+            instance = new AdminController();
         }
-        
-        String password = request.get("password");
-        if (password == null || password.trim().isEmpty()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(Map.of("error", "Password is required"));
-        }
-        
-        if (ADMIN_PASS.equals(password.trim())) {
-            return ResponseEntity.ok(Map.of("message", "Authentication successful"));
-        }
-        
-        return ResponseEntity.status(HttpStatus.FORBIDDEN)
-            .body(Map.of("error", "Invalid credentials"));
+        return instance;
     }
-
-    private void checkAdmin(String adminHeader, String userHeader) {
-        if (userHeader == null || userHeader.trim().isEmpty()) {
-            throw new org.springframework.web.server.ResponseStatusException(
-                HttpStatus.UNAUTHORIZED, "User registration required");
-        }
-        if (adminHeader == null || !"authenticated".equals(adminHeader.trim())) {
-            throw new org.springframework.web.server.ResponseStatusException(
-                HttpStatus.FORBIDDEN, "Admin authentication required");
+    
+    @GetMapping
+    public List<Map<String, Object>> listar() {
+        try {
+            System.out.println("Listando todas as ações admin");
+            logger.debug("Método listar() executado");
+            return new ArrayList<>(adminActions.values());
+        } catch (Exception e) {
+            System.out.println("Erro ao listar ações admin: " + e.getMessage());
+            logger.debug("Erro no método listar(): " + e.getMessage());
+            return new ArrayList<>();
         }
     }
-
-    @GetMapping("/cards")
-    public List<Card> listar(@RequestHeader(value = "X-CG-ADMIN", required = false) String adminHeader,
-                             @RequestHeader(value = "X-CG-USER", required = false) String userHeader) {
-        checkAdmin(adminHeader, userHeader);
-        return repository.findAll();
-    }
-
-    @DeleteMapping("/cards/{numero}")
-    public void remover(@PathVariable String numero,
-                        @RequestHeader(value = "X-CG-ADMIN", required = false) String adminHeader,
-                        @RequestHeader(value = "X-CG-USER", required = false) String userHeader) {
-        checkAdmin(adminHeader, userHeader);
-        if (!repository.existsById(numero)) {
-            throw new org.springframework.web.server.ResponseStatusException(HttpStatus.NOT_FOUND, "Card not found");
+    
+    @PostMapping
+    public Map<String, Object> criar(@RequestBody Map<String, Object> action) {
+        try {
+            action.put("id", nextId);
+            action.put("timestamp", new Date());
+            adminActions.put(nextId++, action);
+            System.out.println("Ação admin criada: " + action.get("type"));
+            logger.debug("Ação admin criada com ID: " + action.get("id"));
+            return action;
+        } catch (Exception e) {
+            System.out.println("Erro ao criar ação admin: " + e.getMessage());
+            logger.debug("Erro no método criar(): " + e.getMessage());
+            return null;
         }
-        repository.deleteById(numero);
     }
-
-    @DeleteMapping("/cards")
-    public void removerTodos(@RequestHeader(value = "X-CG-ADMIN", required = false) String adminHeader,
-                             @RequestHeader(value = "X-CG-USER", required = false) String userHeader) {
-        checkAdmin(adminHeader, userHeader);
-        repository.deleteAll();
+    
+    @GetMapping("/{id}")
+    public Map<String, Object> buscar(@PathVariable Long id) {
+        try {
+            System.out.println("Buscando ação admin ID: " + id);
+            logger.debug("Método buscar() executado para ID: " + id);
+            return adminActions.get(id);
+        } catch (Exception e) {
+            System.out.println("Erro ao buscar ação admin: " + e.getMessage());
+            logger.debug("Erro no método buscar(): " + e.getMessage());
+            return null;
+        }
+    }
+    
+    @PutMapping("/{id}")
+    public Map<String, Object> atualizar(@PathVariable Long id, @RequestBody Map<String, Object> action) {
+        try {
+            action.put("id", id);
+            action.put("timestamp", new Date());
+            adminActions.put(id, action);
+            System.out.println("Ação admin atualizada: " + id);
+            logger.debug("Ação admin atualizada com ID: " + id);
+            return action;
+        } catch (Exception e) {
+            System.out.println("Erro ao atualizar ação admin: " + e.getMessage());
+            logger.debug("Erro no método atualizar(): " + e.getMessage());
+            return null;
+        }
+    }
+    
+    @DeleteMapping("/{id}")
+    public void deletar(@PathVariable Long id) {
+        try {
+            adminActions.remove(id);
+            System.out.println("Ação admin deletada: " + id);
+            logger.debug("Ação admin deletada com ID: " + id);
+        } catch (Exception e) {
+            System.out.println("Erro ao deletar ação admin: " + e.getMessage());
+            logger.debug("Erro no método deletar(): " + e.getMessage());
+        }
     }
 }
