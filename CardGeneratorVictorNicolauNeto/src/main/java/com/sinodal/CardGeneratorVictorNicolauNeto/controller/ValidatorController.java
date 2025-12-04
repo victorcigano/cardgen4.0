@@ -1,11 +1,10 @@
 package com.sinodal.CardGeneratorVictorNicolauNeto.controller;
 
 import com.sinodal.CardGeneratorVictorNicolauNeto.model.Card;
-import com.sinodal.CardGeneratorVictorNicolauNeto.service.CardService;
+import com.sinodal.CardGeneratorVictorNicolauNeto.model.CardValidator;
 import com.sinodal.CardGeneratorVictorNicolauNeto.factory.CardFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import java.util.*;
 
@@ -16,9 +15,6 @@ public class ValidatorController {
     private static final Logger logger = LoggerFactory.getLogger(ValidatorController.class);
     private static ValidatorController instance;
     private final CardFactory cardFactory = CardFactory.getInstance();
-    
-    @Autowired
-    private CardService cardService;
     
     private final Map<Long, Map<String, Object>> validations = new HashMap<>();
     private Long nextId = 1L;
@@ -46,7 +42,7 @@ public class ValidatorController {
     @PostMapping
     public Map<String, Object> validar(@RequestBody Card card) {
         try {
-            boolean isValid = cardService.validarCard(card);
+            boolean isValid = CardValidator.validar(card);
             Map<String, Object> result = new HashMap<>();
             result.put("id", nextId);
             result.put("card", card);
@@ -80,7 +76,7 @@ public class ValidatorController {
     @PutMapping("/{id}")
     public Map<String, Object> atualizar(@PathVariable Long id, @RequestBody Card card) {
         try {
-            boolean isValid = cardService.validarCard(card);
+            boolean isValid = CardValidator.validar(card);
             Map<String, Object> result = new HashMap<>();
             result.put("id", id);
             result.put("card", card);

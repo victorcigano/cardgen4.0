@@ -14,24 +14,13 @@ import java.util.List;
 public class CardController {
     
     private static final Logger logger = LoggerFactory.getLogger(CardController.class);
-    private static CardController instance;
     private final CardFactory cardFactory = CardFactory.getInstance();
 
     @Autowired
     private CardGenerator generator;
-    
-    @Autowired
-    private CardService cardService;
 
     @Autowired
     private com.sinodal.CardGeneratorVictorNicolauNeto.model.CardRepository repository;
-    
-    public static CardController getInstance() {
-        if (instance == null) {
-            instance = new CardController();
-        }
-        return instance;
-    }
 
     @PostMapping("/gerar")
     public Card gerarCard(@RequestHeader(value = "X-CG-USER", required = false) String headerUser, 
@@ -51,9 +40,9 @@ public class CardController {
                     org.springframework.http.HttpStatus.BAD_REQUEST, "Name too long (max 100 characters)");
             }
             
-            // Polimorfismo - usando factory e interface
-            Card card = cardFactory.criarCard(null, user);
-            boolean isValid = cardService.validarCard(card);
+            // Usando generator diretamente
+            Card card = generator.gerarCard(user);
+            boolean isValid = CardValidator.validar(card);
             
             System.out.println("Cartão gerado para: " + user);
             logger.debug("Cartão gerado com sucesso para: " + user);
