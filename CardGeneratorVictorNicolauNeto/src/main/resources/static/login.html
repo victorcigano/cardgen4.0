@@ -279,6 +279,33 @@
     .password-toggle:hover {
       color: var(--accent);
     }
+    
+    .alert {
+      border-radius: 12px;
+      border: none;
+      font-weight: 500;
+    }
+    
+    .alert-success {
+      background: linear-gradient(135deg, rgba(0,255,136,0.1), rgba(0,255,136,0.2));
+      color: var(--success);
+      border: 1px solid rgba(0,255,136,0.3);
+    }
+    
+    .alert-danger {
+      background: linear-gradient(135deg, rgba(255,71,87,0.1), rgba(255,71,87,0.2));
+      color: var(--danger);
+      border: 1px solid rgba(255,71,87,0.3);
+    }
+    
+    #registerForm {
+      animation: slideIn 0.3s ease-out;
+    }
+    
+    @keyframes slideIn {
+      0% { opacity: 0; transform: translateY(20px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
   </style>
 </head>
 <body>
@@ -332,10 +359,44 @@
         <span>ou</span>
       </div>
 
-      <a href="/?guest=true" class="guest-btn">
+      <button type="button" class="guest-btn mb-3" onclick="showRegisterForm()">
         <i class="bi bi-person-plus me-2"></i>
+        Criar Nova Conta
+      </button>
+
+      <a href="/?guest=true" class="guest-btn">
+        <i class="bi bi-eye me-2"></i>
         Continuar como Convidado
       </a>
+
+      <!-- Register Form (hidden by default) -->
+      <div id="registerForm" class="mt-4" style="display: none;">
+        <h5 class="text-center mb-3" style="color: var(--accent);">Criar Nova Conta</h5>
+        <div class="form-floating mb-3">
+          <input type="text" class="form-control" id="regNome" placeholder="Nome completo" required>
+          <label for="regNome"><i class="bi bi-person me-2"></i>Nome completo</label>
+        </div>
+        <div class="form-floating mb-3">
+          <input type="email" class="form-control" id="regEmail" placeholder="Email" required>
+          <label for="regEmail"><i class="bi bi-envelope me-2"></i>Email</label>
+        </div>
+        <div class="form-floating mb-3">
+          <input type="text" class="form-control" id="regLogin" placeholder="Nome de usuário" required>
+          <label for="regLogin"><i class="bi bi-person-badge me-2"></i>Nome de usuário</label>
+        </div>
+        <div class="form-floating mb-3">
+          <input type="password" class="form-control" id="regSenha" placeholder="Senha" required>
+          <label for="regSenha"><i class="bi bi-lock me-2"></i>Senha</label>
+        </div>
+        <button type="button" class="btn-login mb-3" onclick="registerUser()">
+          <i class="bi bi-person-plus me-2"></i>
+          Criar Conta
+        </button>
+        <button type="button" class="guest-btn" onclick="hideRegisterForm()">
+          <i class="bi bi-arrow-left me-2"></i>
+          Voltar ao Login
+        </button>
+      </div>
     </div>
   </div>
 
@@ -354,23 +415,102 @@
       }
     }
 
-    document.getElementById('loginForm').addEventListener('submit', function(e) {
+    document.getElementById('loginForm').addEventListener('submit', async function(e) {
       e.preventDefault();
       
       const username = document.getElementById('username').value.trim();
       const password = document.getElementById('password').value;
       
-      if (!username) {
-        alert('Por favor, digite seu nome de usuário');
+      if (!username || !password) {
+        showMessage('Por favor, preencha todos os campos', 'danger');
         return;
       }
       
-      // Simular login - redirecionar para a aplicação principal
-      sessionStorage.setItem('cg_user', username);
-      window.location.href = '/';
+      try {
+        const response = await fetch('/api/users/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ login: username, senha: password })
+        });
+        
+        if (response.ok) {
+          const user = await response.json();
+          sessionStorage.setItem('cg_user', user.nome);
+          sessionStorage.setItem('cg_user_id', user.id);
+          showMessage('Login realizado com sucesso!', 'success');
+          setTimeout(() => window.location.href = '/', 1000);
+        } else {
+          showMessage('Usuário ou senha incorretos', 'danger');
+        }
+      } catch (e) {
+        showMessage('Erro ao fazer login: ' + e.message, 'danger');
+      }
     });
 
-    // Adicionar efeito de digitação no título
+    function showRegisterForm() {
+      document.getElementById('loginForm').style.display = 'none';
+      document.querySelector('.divider').style.display = 'none';
+      document.querySelector('.guest-btn:not(#registerForm .guest-btn)').style.display = 'none';
+      document.querySelector('button[onclick="showRegisterForm()"]').style.display = 'none';
+      document.getElementById('registerForm').style.display = 'block';
+    }
+
+    function hideRegisterForm() {
+      document.getElementById('loginForm').style.display = 'block';
+      document.querySelector('.divider').style.display = 'block';
+      document.querySelector('.guest-btn:not(#registerForm .guest-btn)').style.display = 'block';
+      document.querySelector('button[onclick="showRegisterForm()"]').style.display = 'block';
+      document.getElementById('registerForm').style.display = 'none';
+    }
+
+    async function registerUser() {
+      const nome = document.getElementById('regNome').value.trim();
+      const email = document.getElementById('regEmail').value.trim();
+      const login = document.getElementById('regLogin').value.trim();
+      const senha = document.getElementById('regSenha').value.trim();
+      
+      if (!nome || !email || !login || !senha) {
+        showMessage('Por favor, preencha todos os campos', 'danger');
+        return;
+      }
+      
+      try {
+        const response = await fetch('/api/users/cadastrar', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ nome, email, login, senha })
+        });
+        
+        if (response.ok) {
+          const user = await response.json();
+          showMessage('Conta criada com sucesso! Fazendo login...', 'success');
+          sessionStorage.setItem('cg_user', user.nome);
+          sessionStorage.setItem('cg_user_id', user.id);
+          setTimeout(() => window.location.href = '/', 1500);
+        } else {
+          const error = await response.text();
+          showMessage('Erro ao criar conta: ' + error, 'danger');
+        }
+      } catch (e) {
+        showMessage('Erro ao criar conta: ' + e.message, 'danger');
+      }
+    }
+
+    function showMessage(message, type) {
+      const existingAlert = document.querySelector('.alert');
+      if (existingAlert) existingAlert.remove();
+      
+      const alert = document.createElement('div');
+      alert.className = `alert alert-${type === 'success' ? 'success' : 'danger'} mt-3`;
+      alert.textContent = message;
+      
+      const form = document.getElementById('registerForm').style.display === 'none' ? 
+        document.getElementById('loginForm') : document.getElementById('registerForm');
+      form.appendChild(alert);
+      
+      setTimeout(() => alert.remove(), 5000);
+    }
+
     document.addEventListener('DOMContentLoaded', function() {
       const logo = document.querySelector('.login-logo');
       const text = logo.textContent;

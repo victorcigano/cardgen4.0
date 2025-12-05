@@ -15,5 +15,6 @@ public class PagamentoCartao extends Pagamento {
         return CardValidator.validar(cartao) && valor > 0;
     }
     
+    
     public Card getCartao() { return cartao; }
 }

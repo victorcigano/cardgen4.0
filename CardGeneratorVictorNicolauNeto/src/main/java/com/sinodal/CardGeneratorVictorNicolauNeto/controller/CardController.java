@@ -6,101 +6,152 @@ import com.sinodal.CardGeneratorVictorNicolauNeto.service.CardService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 import java.util.List;
 
 @RestController
-@RequestMapping("/cards")
+@RequestMapping("/api/cartoes")
 public class CardController {
     
     private static final Logger logger = LoggerFactory.getLogger(CardController.class);
+    private static CardController instance;
     private final CardFactory cardFactory = CardFactory.getInstance();
 
     @Autowired
     private CardGenerator generator;
 
     @Autowired
-    private com.sinodal.CardGeneratorVictorNicolauNeto.model.CardRepository repository;
+    private CardRepository repository;
+    
+    @Autowired
+    private CardService cardService;
+    
+    public static CardController getInstance() {
+        if (instance == null) {
+            instance = new CardController();
+        }
+        return instance;
+    }
 
     @PostMapping("/gerar")
-    public Card gerarCard(@RequestHeader(value = "X-CG-USER", required = false) String headerUser, 
-                         @RequestParam(required = false) String nomeTitular) {
+    public Card gerarCartao(@RequestHeader(value = "X-CG-USER", required = false) String headerUser, 
+                           @RequestParam(required = false) String nomeTitular,
+                           @RequestParam(required = false, defaultValue = "Visa") String bandeira) {
         try {
-            String user = (nomeTitular != null && !nomeTitular.trim().isEmpty()) ? 
-                         nomeTitular.trim() : 
-                         (headerUser != null ? headerUser.trim() : null);
+            System.out.println("Iniciando geração de cartão");
+            logger.debug("Método gerarCartao() executado");
             
-            if (user == null || user.isEmpty()) {
-                throw new org.springframework.web.server.ResponseStatusException(
-                    org.springframework.http.HttpStatus.UNAUTHORIZED, "User registration required");
+            // Verifica qual nome usar
+            String usuario = nomeTitular != null ? nomeTitular : headerUser;
+            
+            if (usuario == null || usuario.trim().isEmpty()) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Nome do titular é obrigatório");
             }
             
-            if (user.length() > 100) {
-                throw new org.springframework.web.server.ResponseStatusException(
-                    org.springframework.http.HttpStatus.BAD_REQUEST, "Name too long (max 100 characters)");
+            // Valida bandeira
+            if (!isValidBandeira(bandeira)) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bandeira inválida. Use: Visa, MasterCard, American Express, Elo, Hipercard");
             }
             
-            // Usando generator diretamente
-            Card card = generator.gerarCard(user);
-            boolean isValid = CardValidator.validar(card);
+            // Gera o cartão usando Factory e Interface
+            Card novoCartao = cardService.gerarCard(usuario.trim(), bandeira);
             
-            System.out.println("Cartão gerado para: " + user);
-            logger.debug("Cartão gerado com sucesso para: " + user);
+            System.out.println("Cartão " + bandeira + " gerado para: " + usuario);
             
-            if (isValid) {
-                repository.save(card);
-            } else {
-                throw new org.springframework.web.server.ResponseStatusException(
-                    org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR, "Failed to generate valid card");
+            // Valida usando a interface
+            if (!cardService.validarCard(novoCartao)) {
+                throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Cartão inválido gerado");
             }
-            return card;
+            
+
+            logger.debug("Cartão criado com sucesso para: " + usuario);
+            
+            // Salva no banco
+            return repository.save(novoCartao);
         } catch (Exception e) {
             System.out.println("Erro ao gerar cartão: " + e.getMessage());
-            logger.debug("Erro no método gerarCard(): " + e.getMessage());
+            logger.debug("Erro no método gerarCartao(): " + e.getMessage());
             throw e;
         }
     }
 
-    @GetMapping("/listar")
-    public List<Card> listarCards() {
+    @GetMapping
+    public List<Card> buscarTodos() {
         try {
             System.out.println("Listando todos os cartões");
-            logger.debug("Método listarCards() executado");
+            logger.debug("Método buscarTodos() executado");
             return repository.findAll();
         } catch (Exception e) {
             System.out.println("Erro ao listar cartões: " + e.getMessage());
-            logger.debug("Erro no método listarCards(): " + e.getMessage());
-            return List.of();
+            logger.debug("Erro no método buscarTodos(): " + e.getMessage());
+            throw e;
         }
     }
 
     @DeleteMapping("/{numero}")
-    public void removerCard(@PathVariable String numero, 
-                           @RequestHeader(value = "X-CG-USER", required = false) String headerUser) {
-        if (headerUser == null || headerUser.trim().isEmpty()) {
-            throw new org.springframework.web.server.ResponseStatusException(
-                org.springframework.http.HttpStatus.UNAUTHORIZED, "User registration required");
+    public String deletarCartao(@PathVariable String numero) {
+        try {
+            System.out.println("Removendo cartão: " + numero);
+            logger.debug("Método deletarCartao() executado para: " + numero);
+            repository.deleteById(numero);
+            return "Cartão removido com sucesso";
+        } catch (Exception e) {
+            System.out.println("Erro ao remover cartão: " + e.getMessage());
+            logger.debug("Erro no método deletarCartao(): " + e.getMessage());
+            return "Erro ao remover cartão: " + e.getMessage();
         }
-        
-        if (numero == null || numero.trim().isEmpty()) {
-            throw new org.springframework.web.server.ResponseStatusException(
-                org.springframework.http.HttpStatus.BAD_REQUEST, "Card number is required");
-        }
-        
-        if (!repository.existsById(numero.trim())) {
-            throw new org.springframework.web.server.ResponseStatusException(
-                org.springframework.http.HttpStatus.NOT_FOUND, "Card not found");
-        }
-        repository.deleteById(numero.trim());
     }
 
-    @DeleteMapping
-    public void removerTodos(@RequestHeader(value = "X-CG-USER", required = false) String headerUser) {
-        if (headerUser == null || headerUser.trim().isEmpty()) {
-            throw new org.springframework.web.server.ResponseStatusException(
-                org.springframework.http.HttpStatus.UNAUTHORIZED, "User registration required");
+    @DeleteMapping("/limpar")
+    public String limparTodos() {
+        try {
+            System.out.println("Limpando todos os cartões");
+            logger.debug("Método limparTodos() executado");
+            repository.deleteAll();
+            return "Todos os cartões foram removidos";
+        } catch (Exception e) {
+            System.out.println("Erro ao limpar cartões: " + e.getMessage());
+            logger.debug("Erro no método limparTodos(): " + e.getMessage());
+            return "Erro ao limpar cartões: " + e.getMessage();
         }
-        repository.deleteAll();
+    }
+    
+    @PutMapping("/{numero}")
+    public Card atualizarCartao(@PathVariable String numero, @RequestBody Card card) {
+        try {
+            System.out.println("Atualizando cartão: " + numero);
+            logger.debug("Método atualizarCartao() executado");
+            card.setNumero(numero);
+            return repository.save(card);
+        } catch (Exception e) {
+            System.out.println("Erro ao atualizar cartão: " + e.getMessage());
+            logger.debug("Erro no método atualizarCartao(): " + e.getMessage());
+            throw e;
+        }
+    }
+    
+    private boolean isValidBandeira(String bandeira) {
+        return bandeira != null && 
+               (bandeira.equals("Visa") || 
+                bandeira.equals("MasterCard") || 
+                bandeira.equals("American Express") || 
+                bandeira.equals("Elo") || 
+                bandeira.equals("Hipercard"));
+    }
+    
+    @GetMapping("/bandeiras")
+    public List<String> listarBandeiras() {
+        try {
+            System.out.println("Listando bandeiras disponíveis");
+            logger.debug("Método listarBandeiras() executado");
+            return List.of("Visa", "MasterCard", "American Express", "Elo", "Hipercard");
+        } catch (Exception e) {
+            System.out.println("Erro ao listar bandeiras: " + e.getMessage());
+            logger.debug("Erro no método listarBandeiras(): " + e.getMessage());
+            return List.of();
+        }
     }
 }
 

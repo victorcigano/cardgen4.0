@@ -174,6 +174,18 @@
       color: var(--text-muted);
     }
     
+    /* Estilo específico para select */
+    select.form-control {
+      background: rgba(255,255,255,0.05);
+      color: var(--text);
+    }
+    
+    select.form-control option {
+      background: var(--panel);
+      color: var(--text);
+      padding: 0.5rem;
+    }
+    
     .hacker-banner {
       background: linear-gradient(135deg, rgba(0,255,136,0.1), rgba(0,212,255,0.1));
       border: 1px solid rgba(0,255,136,0.3);
@@ -288,7 +300,11 @@
       <a class="navbar-brand" href="#">CardGenerator</a>
       <div class="ms-auto d-flex align-items-center">
         <div id="userDisplay" class="me-3 text-white small-muted"></div>
-  <button id="btnAdmin" class="btn btn-outline-light btn-sm me-2">
+
+        <button id="btnUsers" class="btn btn-outline-light btn-sm me-2" data-bs-toggle="modal" data-bs-target="#usersModal">
+            <i class="bi bi-people me-1"></i>Conta
+          </button>
+        <button id="btnAdmin" class="btn btn-outline-light btn-sm me-2">
             <i class="bi bi-gear me-1"></i>Admin
           </button>
           <button id="btnLogin" class="btn btn-outline-light btn-sm me-2" data-bs-toggle="modal" data-bs-target="#loginModal">
@@ -306,9 +322,19 @@
       <div class="col-md-6">
         <div class="card p-4">
           <h3 class="mb-3">Gerar cartão</h3>
-          <div class="mb-4">
-            <label class="form-label fw-bold">💳 Nome do titular</label>
+          <div class="mb-3">
+            <label class="form-label fw-bold">Nome do titular</label>
             <input id="nome" type="text" class="form-control" placeholder="Digite o nome do portador do cartão" />
+          </div>
+          <div class="mb-4">
+            <label class="form-label fw-bold">Bandeira do cartão</label>
+            <select id="bandeira" class="form-control" style="background: rgba(255,255,255,0.05); color: var(--text);">
+              <option value="Visa">Visa</option>
+              <option value="MasterCard">MasterCard</option>
+              <option value="American Express">American Express</option>
+              <option value="Elo">Elo</option>
+              <option value="Hipercard">Hipercard</option>
+            </select>
             <div class="hacker-banner mt-3">
               <i class="bi bi-shield-check me-2"></i>
               <strong>Modo Seguro:</strong> Cartões fictícios para desenvolvimento e testes
@@ -357,33 +383,77 @@
     <div class="modal-dialog modal-xl modal-dialog-centered">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title">Administração - Cartões</h5>
+          <h5 class="modal-title">Administração</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
-          <div class="d-flex justify-content-between align-items-center mb-3">
-            <div>
-              <button id="refreshAdmin" class="btn btn-sm btn-primary">Atualizar</button>
-              <button id="exportCsv" class="btn btn-sm btn-secondary">Exportar CSV</button>
-              <button id="deleteAllAdmin" class="btn btn-sm btn-danger">Remover tudo</button>
+          <!-- Tabs Navigation -->
+          <ul class="nav nav-tabs mb-3" id="adminTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+              <button class="nav-link active" id="cards-tab" data-bs-toggle="tab" data-bs-target="#cards-panel" type="button" role="tab">Cartões</button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" id="users-tab" data-bs-toggle="tab" data-bs-target="#users-panel" type="button" role="tab">Usuários</button>
+            </li>
+          </ul>
+          
+          <!-- Tab Content -->
+          <div class="tab-content" id="adminTabContent">
+            <!-- Cards Panel -->
+            <div class="tab-pane fade show active" id="cards-panel" role="tabpanel">
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <div>
+                  <button id="refreshAdmin" class="btn btn-sm btn-primary">Atualizar</button>
+                  <button id="exportCsv" class="btn btn-sm btn-secondary">Exportar CSV</button>
+                  <button id="deleteAllAdmin" class="btn btn-sm btn-danger">Remover tudo</button>
+                </div>
+                <div class="text-muted small">Total: <span id="adminCount">0</span></div>
+              </div>
+              <div class="table-responsive" style="max-height:520px;overflow:auto">
+                <table class="table table-dark table-striped" id="adminTable">
+                  <thead>
+                    <tr>
+                      <th>Numero</th>
+                      <th>Titular</th>
+                      <th>Usuario</th>
+                      <th>Validade</th>
+                      <th>CVV</th>
+                      <th>Bandeira</th>
+                      <th>Teste</th>
+                      <th>Ações</th>
+                    </tr>
+                  </thead>
+                  <tbody></tbody>
+                </table>
+              </div>
             </div>
-            <div class="text-muted small">Total: <span id="adminCount">0</span></div>
-          </div>
-          <div class="table-responsive" style="max-height:520px;overflow:auto">
-            <table class="table table-dark table-striped" id="adminTable">
-              <thead>
-                <tr>
-                  <th>Numero</th>
-                  <th>Titular</th>
-                  <th>Validade</th>
-                  <th>CVV</th>
-                  <th>Bandeira</th>
-                  <th>Teste</th>
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody></tbody>
-            </table>
+            
+            <!-- Users Panel -->
+            <div class="tab-pane fade" id="users-panel" role="tabpanel">
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <div>
+                  <button id="refreshUsers" class="btn btn-sm btn-primary">Atualizar</button>
+                  <button id="deleteAllUsers" class="btn btn-sm btn-danger">Remover todos usuários</button>
+                </div>
+                <div class="text-muted small">Total usuários: <span id="usersCount">0</span></div>
+              </div>
+              <div class="table-responsive" style="max-height:520px;overflow:auto">
+                <table class="table table-dark table-striped" id="usersTable">
+                  <thead>
+                    <tr>
+                      <th>ID</th>
+                      <th>Nome</th>
+                      <th>Email</th>
+                      <th>Login</th>
+                      <th>Senha</th>
+                      <th>Último Login</th>
+                      <th>Ações</th>
+                    </tr>
+                  </thead>
+                  <tbody></tbody>
+                </table>
+              </div>
+            </div>
           </div>
         </div>
         <div class="modal-footer">
@@ -415,6 +485,8 @@
     </div>
   </div>
 
+
+
   <!-- Login Modal -->
   <div class="modal fade" id="loginModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
@@ -425,11 +497,11 @@
         </div>
         <div class="modal-body">
           <div class="mb-3">
-            <label class="form-label">Nome</label>
-            <input id="loginNome" class="form-control" placeholder="" />
+            <label class="form-label">Login</label>
+            <input id="loginNome" class="form-control" placeholder="Digite seu login" />
           </div>
           <div class="mb-3">
-            <label class="form-label">Senha (apenas UI)</label>
+            <label class="form-label">Senha</label>
             <div class="input-group">
               <input id="loginSenha" type="password" class="form-control" placeholder="senha" />
               <button id="toggleSenha" class="btn btn-outline-secondary" type="button" title="Mostrar senha"><i class="bi bi-eye"></i></button>
@@ -439,6 +511,69 @@
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
           <button id="submitLogin" type="button" class="btn btn-primary">Entrar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Users/Account Modal -->
+  <div class="modal fade" id="usersModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Minha Conta</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <!-- Tabs Navigation -->
+          <ul class="nav nav-tabs mb-3" id="accountTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+              <button class="nav-link active" id="login-tab" data-bs-toggle="tab" data-bs-target="#login-panel" type="button" role="tab">Entrar</button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" id="register-tab" data-bs-toggle="tab" data-bs-target="#register-panel" type="button" role="tab">Criar Conta</button>
+            </li>
+          </ul>
+          
+          <!-- Tab Content -->
+          <div class="tab-content" id="accountTabContent">
+            <!-- Login Panel -->
+            <div class="tab-pane fade show active" id="login-panel" role="tabpanel">
+              <div class="mb-3">
+                <label class="form-label">Login</label>
+                <input id="modalLoginNome" class="form-control" placeholder="Digite seu login" />
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Senha</label>
+                <input id="modalLoginSenha" type="password" class="form-control" placeholder="senha" />
+              </div>
+              <button id="modalSubmitLogin" type="button" class="btn btn-primary">Entrar</button>
+            </div>
+            
+            <!-- Register Panel -->
+            <div class="tab-pane fade" id="register-panel" role="tabpanel">
+              <div class="mb-3">
+                <label class="form-label">Nome</label>
+                <input id="newUserNome" class="form-control" placeholder="Nome completo" />
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Email</label>
+                <input id="newUserEmail" type="email" class="form-control" placeholder="email@exemplo.com" />
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Login</label>
+                <input id="newUserLogin" class="form-control" placeholder="nome_usuario" />
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Senha</label>
+                <input id="newUserSenha" type="password" class="form-control" placeholder="senha" />
+              </div>
+              <button id="btnCadastrarUser" class="btn btn-primary">Criar Conta</button>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
         </div>
       </div>
     </div>

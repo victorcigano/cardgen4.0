@@ -36,7 +36,7 @@ class CardGeneratorTest {
         YearMonth validade = cardGenerator.gerarValidade();
         
         assertNotNull(validade);
-        assertTrue(validade.isAfter(YearMonth.now()) || validade.equals(YearMonth.now()));
+        assertTrue(validade.compareTo(YearMonth.now()) >= 0);
     }
 
     @Test

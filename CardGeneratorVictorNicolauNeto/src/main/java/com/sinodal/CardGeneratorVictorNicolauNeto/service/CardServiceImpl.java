@@ -12,7 +12,11 @@ public class CardServiceImpl implements CardService {
     
     @Override
     public Card gerarCard(String nomeTitular, String bandeira) {
-        return cardGenerator.gerarCard(nomeTitular);
+        Card card = cardGenerator.gerarCard(nomeTitular);
+        card.setBandeira(bandeira);
+        // Gera número específico para a bandeira
+        card.setNumero(cardGenerator.gerarNumeroParaBandeira(bandeira));
+        return card;
     }
     
     @Override

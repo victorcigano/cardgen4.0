@@ -15,7 +15,10 @@ public class User {
     
     private String nome;
     private String email;
+    private String login;
+    private String senha;
     private LocalDateTime dataCriacao;
+    private LocalDateTime ultimoLogin;
     
     // Associação: Um usuário pode ter muitos cartões
     @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL)

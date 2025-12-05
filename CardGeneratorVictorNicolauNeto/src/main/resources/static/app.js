@@ -74,9 +74,10 @@ function showToast(message, variant = 'primary') {
 async function gerar() {
   if (!isLoggedIn()) { showToast('Você precisa entrar para gerar um cartão.', 'warning'); return }
   const nome = document.getElementById('nome').value || sessionStorage.getItem('cg_user') || 'Anonimo';
+  const bandeira = document.getElementById('bandeira').value || 'Visa';
   try {
     const headers = { 'X-CG-USER': getUser() || '' };
-    const res = await fetch(`/cards/gerar?nomeTitular=${encodeURIComponent(nome)}`, { method: 'POST', headers });
+    const res = await fetch(`/api/cartoes/gerar?nomeTitular=${encodeURIComponent(nome)}&bandeira=${encodeURIComponent(bandeira)}`, { method: 'POST', headers });
     if (!res.ok) throw new Error('Erro HTTP ' + res.status);
     const card = await res.json();
     showUltimo(card);
@@ -118,7 +119,7 @@ function showUltimo(card) {
 
 async function listar() {
   try {
-    const res = await fetch('/cards/listar');
+    const res = await fetch('/api/cartoes');
     const list = await res.json();
     const div = document.getElementById('lista');
     div.innerHTML = '';
@@ -152,7 +153,7 @@ async function listar() {
         if (!confirm('Remover este cartão?')) return;
         try {
           const headers = { 'X-CG-USER': getUser() || '' };
-          const resp = await fetch(`/cards/${encodeURIComponent(card.numero)}`, { method: 'DELETE', headers });
+          const resp = await fetch(`/api/cartoes/${encodeURIComponent(card.numero)}`, { method: 'DELETE', headers });
           if (resp.status === 204 || resp.ok) {
             showToast('Cartão removido', 'success');
             await listar();
@@ -178,12 +179,15 @@ async function listar() {
 }
 
 document.getElementById('gerar').addEventListener('click', gerar);
-document.getElementById('limpar').addEventListener('click', () => { document.getElementById('nome').value = '' });
+document.getElementById('limpar').addEventListener('click', () => { 
+  document.getElementById('nome').value = ''; 
+  document.getElementById('bandeira').value = 'Visa'; 
+});
 document.getElementById('removerTodos').addEventListener('click', async () => {
   if (!confirm('Remover todos os cartões?')) return;
   try {
   const headers = { 'X-CG-USER': getUser() || '' };
-  const resp = await fetch('/cards', { method: 'DELETE', headers });
+  const resp = await fetch('/api/cartoes/limpar', { method: 'DELETE', headers });
     if (resp.ok) {
       showToast('Todos os cartões removidos', 'success');
       await listar();
@@ -219,43 +223,108 @@ function getAdminHeaders() {
 async function loadAdminList() {
   try {
     if (!isAdminAuthed) { showToast('Autenticação admin necessária', 'warning'); return; }
-    const res = await fetch('/admin/cards', { headers: getAdminHeaders() });
-    const list = await res.json();
+    
+    // Carregar cartões
+    const cardsRes = await fetch('/api/admin/cards');
+    const cards = await cardsRes.json();
+    
+    // Carregar usuários
+    const usersRes = await fetch('/api/admin/users');
+    const users = await usersRes.json();
+    
     const tbody = document.querySelector('#adminTable tbody');
     tbody.innerHTML = '';
-    (list || []).forEach(card => {
+    
+    // Mostrar cartões
+    (cards || []).forEach(card => {
       const tr = document.createElement('tr');
-      // Sanitize admin table data
+      const sanitize = (str) => String(str || '').replace(/[<>"'&]/g, function(match) {
+        const escapeMap = { '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#x27;', '&': '&amp;' };
+        return escapeMap[match];
+      });
+      
+      const user = users.find(u => u.id === card.usuario?.id);
+      const userName = user ? user.nome : 'N/A';
+      
+      tr.innerHTML = `
+        <td>${sanitize(card.numero)}</td>
+        <td>${sanitize(card.nomeTitular)}</td>
+        <td>${sanitize(userName)}</td>
+        <td>${sanitize(card.validade)}</td>
+        <td>${sanitize(card.cvv)}</td>
+        <td>${sanitize(card.bandeira)}</td>
+        <td>${card.teste ? 'SIM' : 'NÃO'}</td>
+        <td>
+          <button class="btn btn-sm btn-outline-danger admin-delete-card" data-num="${sanitize(card.numero)}">Remover</button>
+        </td>
+      `;
+      tbody.appendChild(tr);
+    });
+    
+    document.getElementById('adminCount').textContent = cards.length;
+    
+    // Event listeners para remoção de cartões
+    document.querySelectorAll('.admin-delete-card').forEach(b => b.addEventListener('click', async (ev) => {
+      const numero = ev.currentTarget.getAttribute('data-num');
+      if (!confirm('Remover este cartão?')) return;
+      try {
+        const resp = await fetch(`/api/admin/cards/${encodeURIComponent(numero)}`, { method: 'DELETE' });
+        if (resp.ok) { showToast('Cartão removido', 'success'); loadAdminList(); } else showToast('Falha ao remover', 'danger');
+      } catch (e) { showToast('Erro: ' + e.message, 'danger') }
+    }));
+    
+  } catch (e) { console.error(e); showToast('Erro ao carregar lista', 'danger') }
+}
+
+async function loadAdminUsers() {
+  try {
+    if (!isAdminAuthed) { showToast('Autenticação admin necessária', 'warning'); return; }
+    
+    const usersRes = await fetch('/api/admin/users');
+    const users = await usersRes.json();
+    
+    const tbody = document.querySelector('#usersTable tbody');
+    tbody.innerHTML = '';
+    
+    // Mostrar usuários
+    (users || []).forEach(user => {
+      const tr = document.createElement('tr');
       const sanitize = (str) => String(str || '').replace(/[<>"'&]/g, function(match) {
         const escapeMap = { '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#x27;', '&': '&amp;' };
         return escapeMap[match];
       });
       
       tr.innerHTML = `
-        <td>${sanitize(card.numero)}</td>
-        <td>${sanitize(card.nomeTitular)}</td>
-        <td>${sanitize(card.validade)}</td>
-        <td>${sanitize(card.cvv)}</td>
-        <td>${sanitize(card.bandeira)}</td>
-        <td>${card.teste ? 'SIM' : 'NÃO'}</td>
-        <td><button class="btn btn-sm btn-outline-danger admin-delete" data-num="${sanitize(card.numero)}">Remover</button></td>
+        <td>${user.id}</td>
+        <td>${sanitize(user.nome)}</td>
+        <td>${sanitize(user.email)}</td>
+        <td>${sanitize(user.login)}</td>
+        <td><span class="badge bg-secondary">${sanitize(user.senha)}</span></td>
+        <td>${user.ultimoLogin || 'Nunca'}</td>
+        <td>
+          <button class="btn btn-sm btn-outline-danger admin-delete-user" data-id="${user.id}">Remover</button>
+        </td>
       `;
       tbody.appendChild(tr);
     });
-    document.getElementById('adminCount').textContent = (list || []).length;
-    // wire delete buttons
-    document.querySelectorAll('.admin-delete').forEach(b => b.addEventListener('click', async (ev) => {
-      const numero = ev.currentTarget.getAttribute('data-num');
-      if (!confirm('Remover este cartão?')) return;
+    
+    document.getElementById('usersCount').textContent = users.length;
+    
+    // Event listeners para remoção de usuários
+    document.querySelectorAll('.admin-delete-user').forEach(b => b.addEventListener('click', async (ev) => {
+      const userId = ev.currentTarget.getAttribute('data-id');
+      if (!confirm('Remover este usuário? Isso também removerá todos os seus cartões!')) return;
       try {
-  const resp = await fetch(`/admin/cards/${encodeURIComponent(numero)}`, { method: 'DELETE', headers: getAdminHeaders() });
-        if (resp.ok) { showToast('Cartão removido', 'success'); loadAdminList(); } else showToast('Falha ao remover', 'danger');
+        const resp = await fetch(`/api/admin/users/${userId}`, { method: 'DELETE' });
+        if (resp.ok) { showToast('Usuário removido', 'success'); loadAdminUsers(); loadAdminList(); } else showToast('Falha ao remover', 'danger');
       } catch (e) { showToast('Erro: ' + e.message, 'danger') }
     }));
-  } catch (e) { console.error(e); showToast('Erro ao carregar lista', 'danger') }
+    
+  } catch (e) { console.error(e); showToast('Erro ao carregar usuários', 'danger') }
 }
 
 document.getElementById('refreshAdmin')?.addEventListener('click', loadAdminList);
+document.getElementById('refreshUsers')?.addEventListener('click', loadAdminUsers);
 document.getElementById('exportCsv')?.addEventListener('click', async () => {
   try {
     if (!isAdminAuthed) { showToast('Autenticação admin necessária', 'warning'); return; }
@@ -272,18 +341,43 @@ document.getElementById('exportCsv')?.addEventListener('click', async () => {
 });
 
 document.getElementById('deleteAllAdmin')?.addEventListener('click', async () => {
-  if (!confirm('Remover todos os cartões?')) return;
+  if (!confirm('Remover TODOS os cartões? Esta ação não pode ser desfeita!')) return;
   try {
     if (!isAdminAuthed) { showToast('Autenticação admin necessária', 'warning'); return; }
-    const resp = await fetch('/admin/cards', { method: 'DELETE', headers: getAdminHeaders() });
-    if (resp.ok) { showToast('Todos removidos', 'success'); loadAdminList(); } else showToast('Falha ao remover todos', 'danger');
+    
+    const cardsResp = await fetch('/api/admin/cards', { method: 'DELETE' });
+    
+    if (cardsResp.ok) { 
+      showToast('Todos os cartões removidos', 'success'); 
+      loadAdminList(); 
+    } else {
+      showToast('Falha ao remover todos os cartões', 'danger');
+    }
   } catch (e) { showToast('Erro ao remover todos: ' + e.message, 'danger') }
 });
 
-// Admin auth flow: require login + admin password '123'
+document.getElementById('deleteAllUsers')?.addEventListener('click', async () => {
+  if (!confirm('Remover TODOS os usuários? Esta ação não pode ser desfeita!')) return;
+  try {
+    if (!isAdminAuthed) { showToast('Autenticação admin necessária', 'warning'); return; }
+    
+    const usersResp = await fetch('/api/admin/users', { method: 'DELETE' });
+    
+    if (usersResp.ok) { 
+      showToast('Todos os usuários removidos', 'success'); 
+      loadAdminUsers();
+      loadAdminList();
+    } else {
+      showToast('Falha ao remover todos os usuários', 'danger');
+    }
+  } catch (e) { showToast('Erro ao remover todos: ' + e.message, 'danger') }
+});
+
 document.getElementById('btnAdmin')?.addEventListener('click', () => {
-  if (!isLoggedIn()) { showToast('Você precisa entrar na aplicação antes de acessar Admin.', 'warning'); return; }
-  // show admin auth modal
+  if (!isLoggedIn()) { 
+    showToast('Você precisa entrar na aplicação antes de acessar Admin.', 'warning'); 
+    return; 
+  }
   const authModalEl = document.getElementById('adminAuthModal');
   const authModal = new bootstrap.Modal(authModalEl);
   authModal.show();
@@ -297,33 +391,64 @@ document.getElementById('adminAuthSubmit')?.addEventListener('click', async () =
   }
   
   try {
-    // Validate admin credentials on server
-    const response = await fetch('/admin/auth', {
+    console.log('Enviando senha:', pass);
+    const response = await fetch('/api/admin/auth', {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
-        'X-CG-USER': getUser() || ''
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify({ password: pass })
     });
     
-    if (response.ok) {
+    console.log('Response status:', response.status);
+    const result = await response.json();
+    console.log('Response data:', result);
+    
+    if (result.success) {
       isAdminAuthed = true;
       const authModal = bootstrap.Modal.getInstance(document.getElementById('adminAuthModal'));
       authModal.hide();
       const adminModal = new bootstrap.Modal(document.getElementById('adminModal'));
       adminModal.show();
-      setTimeout(loadAdminList, 120);
+      showToast('Acesso admin autorizado', 'success');
+      setTimeout(() => {
+        loadAdminList();
+        loadAdminUsers();
+      }, 200);
     } else {
-      showToast('Credenciais inválidas', 'danger');
+      showToast(result.message || 'Credenciais inválidas', 'danger');
     }
   } catch (e) {
+    console.error('Erro na autenticação:', e);
     showToast('Erro na autenticação: ' + e.message, 'danger');
   } finally {
-    // Clear password input
     const pwdEl = document.getElementById('adminSenha');
     if (pwdEl) pwdEl.value = '';
   }
+});
+
+
+
+// Admin tabs event listeners
+document.getElementById('cards-tab')?.addEventListener('click', () => {
+  if (isAdminAuthed) setTimeout(loadAdminList, 100);
+});
+
+document.getElementById('users-tab')?.addEventListener('click', () => {
+  if (isAdminAuthed) setTimeout(loadAdminUsers, 100);
+});
+
+// Enter key support for admin password
+document.getElementById('adminSenha')?.addEventListener('keypress', (e) => {
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    document.getElementById('adminAuthSubmit')?.click();
+  }
+});
+
+// Focus on password field when modal opens
+document.getElementById('adminAuthModal')?.addEventListener('shown.bs.modal', () => {
+  document.getElementById('adminSenha')?.focus();
 });
 
 // Small UX improvements: change default placeholder for login modal
@@ -348,4 +473,78 @@ if (toggleBtn) {
     pwd.focus();
   });
 }
+
+// Modal account functions
+document.getElementById('modalSubmitLogin')?.addEventListener('click', async () => {
+  const login = document.getElementById('modalLoginNome')?.value?.trim();
+  const senha = document.getElementById('modalLoginSenha')?.value;
+  
+  if (!login || !senha) {
+    showToast('Preencha todos os campos', 'warning');
+    return;
+  }
+  
+  try {
+    const response = await fetch('/api/users/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ login, senha })
+    });
+    
+    if (response.ok) {
+      const user = await response.json();
+      setUser(user.nome);
+      sessionStorage.setItem('cg_user_id', user.id);
+      showToast('Login realizado com sucesso!', 'success');
+      const modal = bootstrap.Modal.getInstance(document.getElementById('usersModal'));
+      modal.hide();
+      // Limpar campos
+      document.getElementById('modalLoginNome').value = '';
+      document.getElementById('modalLoginSenha').value = '';
+    } else {
+      showToast('Login ou senha incorretos', 'danger');
+    }
+  } catch (e) {
+    showToast('Erro ao fazer login: ' + e.message, 'danger');
+  }
+});
+
+document.getElementById('btnCadastrarUser')?.addEventListener('click', async () => {
+  const nome = document.getElementById('newUserNome').value.trim();
+  const email = document.getElementById('newUserEmail').value.trim();
+  const login = document.getElementById('newUserLogin').value.trim();
+  const senha = document.getElementById('newUserSenha').value.trim();
+  
+  if (!nome || !email || !login || !senha) {
+    showToast('Preencha todos os campos', 'warning');
+    return;
+  }
+  
+  try {
+    const response = await fetch('/api/users/cadastrar', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ nome, email, login, senha })
+    });
+    
+    if (response.ok) {
+      const user = await response.json();
+      showToast('Conta criada com sucesso! Fazendo login...', 'success');
+      setUser(user.nome);
+      sessionStorage.setItem('cg_user_id', user.id);
+      const modal = bootstrap.Modal.getInstance(document.getElementById('usersModal'));
+      modal.hide();
+      // Limpar campos
+      document.getElementById('newUserNome').value = '';
+      document.getElementById('newUserEmail').value = '';
+      document.getElementById('newUserLogin').value = '';
+      document.getElementById('newUserSenha').value = '';
+    } else {
+      const error = await response.text();
+      showToast('Erro ao criar conta: ' + error, 'danger');
+    }
+  } catch (e) {
+    showToast('Erro ao criar conta: ' + e.message, 'danger');
+  }
+});
 

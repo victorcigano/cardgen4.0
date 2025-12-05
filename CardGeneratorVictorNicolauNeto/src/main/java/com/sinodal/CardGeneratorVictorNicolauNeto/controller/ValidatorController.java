@@ -2,7 +2,6 @@ package com.sinodal.CardGeneratorVictorNicolauNeto.controller;
 
 import com.sinodal.CardGeneratorVictorNicolauNeto.model.Card;
 import com.sinodal.CardGeneratorVictorNicolauNeto.model.CardValidator;
-import com.sinodal.CardGeneratorVictorNicolauNeto.factory.CardFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
@@ -14,7 +13,6 @@ public class ValidatorController {
     
     private static final Logger logger = LoggerFactory.getLogger(ValidatorController.class);
     private static ValidatorController instance;
-    private final CardFactory cardFactory = CardFactory.getInstance();
     
     private final Map<Long, Map<String, Object>> validations = new HashMap<>();
     private Long nextId = 1L;
