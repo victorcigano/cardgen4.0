@@ -1,0 +1,169 @@
+{
+  "info": {
+    "_postman_id": "b9f6a5c2-0000-4d5a-aaaa-111111111111",
+    "name": "CardGenerator - Local",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Cadastrar Usuário",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"nome\": \"Victor Nicolau\",\n  \"email\": \"victor@email.com\",\n  \"login\": \"victor\",\n  \"senha\": \"123456\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8080/api/users/cadastrar",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["api", "users", "cadastrar"]
+        }
+      }
+    },
+    {
+      "name": "Login",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"login\": \"victor\",\n  \"senha\": \"123456\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8080/api/users/login",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["api", "users", "login"]
+        }
+      }
+    },
+    {
+      "name": "Listar Bandeiras",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8080/api/cartoes/bandeiras",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["api", "cartoes", "bandeiras"]
+        }
+      }
+    },
+    {
+      "name": "Gerar Cartão Visa",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8080/api/cartoes/gerar?nomeTitular=Victor&bandeira=Visa",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["api", "cartoes", "gerar"],
+          "query": [
+            {
+              "key": "nomeTitular",
+              "value": "Victor"
+            },
+            {
+              "key": "bandeira",
+              "value": "Visa"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Gerar Cartão MasterCard",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8080/api/cartoes/gerar?nomeTitular=Victor&bandeira=MasterCard",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["api", "cartoes", "gerar"],
+          "query": [
+            {
+              "key": "nomeTitular",
+              "value": "Victor"
+            },
+            {
+              "key": "bandeira",
+              "value": "MasterCard"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Gerar Cartão Elo",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8080/api/cartoes/gerar?nomeTitular=Victor&bandeira=Elo",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["api", "cartoes", "gerar"],
+          "query": [
+            {
+              "key": "nomeTitular",
+              "value": "Victor"
+            },
+            {
+              "key": "bandeira",
+              "value": "Elo"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Listar Cartões",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8080/api/cartoes",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["api", "cartoes"]
+        }
+      }
+    },
+    {
+      "name": "Listar Usuários",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8080/api/users",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["api", "users"]
+        }
+      }
+    }
+  ]
+}

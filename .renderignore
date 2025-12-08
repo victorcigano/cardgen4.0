@@ -1,0 +1,17 @@
+# Render ignore file
+.gradle/
+bin/
+data/
+*.class
+*.log
+*.tmp
+*.temp
+.DS_Store
+Thumbs.db
+*.md
+postman_collection_cardgenerator.json
+HELP.md
+TesteCompleto.java
+TesteHipercard.java
+TesteLuhn.java
+ValidarNumero.java
